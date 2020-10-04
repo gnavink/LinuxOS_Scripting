@@ -1,0 +1,546 @@
+CONTENTS TO TYPE ON THE COMMAND LINE FOR SHELL SCRIPTING
+--------------------------------------------------------
+
+1_VARIABLES:
+-----------
+1) Variable meaning:
+
+   longname="Navin   Kumar"
+   LONGNAME="Pravin  Kumar"
+   echo $longname 
+   echo $LONGNAME
+   echo $longname $LONGNAME 
+  
+
+2) Strong & Weak Quotes:
+
+   a="a     b"
+   echo $a
+   echo "$a"
+   echo '$a'
+
+
+3)  Echo :
+    echo "Enter your name: "
+    echo -n "Enter your name: "
+    echo -e "1\t2"
+
+4) printf
+   printf "Hello world\n"
+   print  "Hello World"
+   printf "one is %d, two is %g\n" 1 2.3
+   printf "%s, %s\n" hello world
+   printf "%s, %b\n" "1\t2" "1\t2"
+   printf "%s\n" hello how are you today
+
+   Summary:
+   Use double quotes for most situation
+   Use echo for simple outputs
+   Use printf for more fine control
+
+
+
+2) ARGUMENTS PROCESSING:
+------------
+
+args-01-show-count 1 2 3 4 'a   b   c'  5  6 
+
+args-01-show-count 1 2 3 4 'a   b   c'  5  6 
+
+./args-03a-process-arguments.sh 1 2 3 4 'a   b   c'  5  6
+
+./args-03b-process-arguments.sh 1 2 3 4 'a   b   c'  5  6
+
+
+3) ESCAPING_SINGLE/DOUBLE QUOTE_TRACING:
+   -------------------------------
+i)
+a=hello
+echo $a
+echo \$a
+b=world
+echo $a $b
+echo '$a $b'
+echo 'string 1'\'' string 2'
+var='a
+> b
+> c'
+echo $var
+echo "$var"
+echo "Here is a quote: \" - pretty neat"
+echo "Here is a back slash: \\ also neat
+
+ii) Tracing:
+
+bash -x ./1_quoting-tracing-demo-01.sh a b '1   2   3'
+
+e.g printf '\tArgument %d: '\''%s'\''\n' 1 a  : Here there are 5 strings concatenated: Every string is within ' '.
+    1st string : \tArgument %d: 
+    2nd string : \' : Single quote
+    3rd string : %s 
+    4th string : \'
+    5th string : \n
+
+bash -x ./1_quoting-tracing-demo-01.sh a b '1   2   3'
+
+4) Re-direction:
+  -------------
+i) Re-direction:
+cat < greetings.txt
+cat < greetings.txt > greetings2.txt
+cmp greetings.txt greetings2.txt
+
+ii)
+cat greetings.txt > test1.txt
+cat test1.txt
+echo one line > test1.txt
+cat test1.txt
+echo another line >> test1.txt
+cat test1.txt
+
+iii) Removing dos characters:
+od -c greetings.txt
+tr -d '\r' < greetings.txt > greetings1.txt  # tr means transliterate or delete
+tr -d '\r' < greetings.txt > greetings1.txt | sort > greetings1.txt
+od -c greetings1.txt  #od means octal dump
+
+iv) Stdout/stderr:
+make hello > hello.out
+cat hello.out
+make hello > make.out 2> make.err
+cat make.out
+
+# points stderr as the same as stdout. Pipes the stdout to the cmd tee which sends the input to both errors file & stdout                        
+make hello 2>&1 | tee errors 
+
+make hello > make.out 2>&1
+
+v) Here document:
+
+cat << EOF
+> Line 1
+> Line 2
+> My home directory is: $HOME
+> EOF
+
+cat << 'EOF'
+> Line 1
+> Line 2
+> My home dir is :$HOME
+>EOF
+
+
+vi) Special files
+echo Navin > /dev/null
+if grep ramanuja /etc/passwd > /dev/null
+then echo ramanuja is a user
+else echo ramanuja is NOT a user
+fi
+
+
+5) Search Path:
+   ------------
+a)
+./searching-01-describe-commands.sh  
+echo $PATH
+PATH=:$PATH
+echo $PATH
+
+b)
+Special-built-in->Shell Function -> Regular Built-in -> Filesystem
+searching-02-verbose-cd.sh
+
+c) type -p who #Prints the filesystem path of the cmd
+
+6) Simple Text Utilities:
+  -----------------------
+  a) od -c <Enter>
+     A\tB\tC <Ctrl+D>
+
+     wc -lwc demo.txt 
+
+  b) printf '\ta\tb\n' 
+
+  c) printf '\ta\tb\n' | od -c
+
+  d) printf '\ta\tb\n' | expand -4 #expands the tabs to 4 spaces
+
+  e) printf '\ta\tb\n' | expand -4 | unexpand -4
+
+  f) printf '\ta\tb\n' | expand -4 | unexpand -a -4
+
+  g) cat demo.txt | tr '[:space:][:punct:]' '\n' | tr '[:upper:]' '[:lower:]' | sort -u | comm -23 - /usr/share/dict/words
+
+  h) sort -u /usr/share/dict/words > list.words 
+     cat demo.txt | tr '[:space:][:punct:]' '\n' | tr '[:upper:]' '[:lower:]' | sort -u | comm -23 - list.words
+
+  i) ./spell.sh demo.txt
+
+  g) printf '\ta\tb\n' | expand -4 | unexpand -a -4 | od -c
+
+7) Regex:
+   ------
+
+ A)
+
+   BRE:
+   ----
+   Echo: Means output the line seen 
+
+   echo 'Hi how r u?' | grep --color 'how' #Matches how
+   echo 'Hi How r u?' | grep --color 'how' # Doesn't match how
+   echo tolstoy says i am toldtoy | grep --color 'tol.toy' # Matches both tolstoy & toldtoy
+   echo tolstoy says i am tol.toy | grep --color 'tol\.toy'
+   echo 123 eafg | grep --color '[aeiou]' #Matches ea
+   echo 123 eafg | sed 's/[aeiou]/X/'     #Output is: 123 Xafg
+   echo you 123 | grep --color [^aeiou]  #Complementary matching . The space also matches, But you can't see it.
+   echo you 123 | grep --color '[[:digit:]]' #Matches only the digits
+   echo you 123 | grep --color '[^[:digit:]]' #Matches except  the digits
+   echo you 123 | grep --color '[[:alpha:]]' #Matches the alpha characters
+   echo you 123 | grep --color '[^[:alpha:]]' #Matches except the alpha characters
+   
+   ------------------------------------------------
+   DO NOT SHOW THIS
+
+   echo 123 you 123 | grep --color '[[:alpha:]]*'
+   echo 123 you 123 | grep --color '[^[:alpha:]]*'
+   echo 123 you 123 | grep --color '[[:digit:]]*'
+   echo 123 you 123 | grep --color '[^[:digit:]]*'
+
+   -------------------------------------------------
+   
+   echo 1a3 1ab3 1aax3 14 | grep --color    '1[[:alpha:]]3'    # Matches only 1a3
+   echo 1a3 1ab3 1aax3 14 13 | grep --color '1[^[:alpha:]]*3'  # Matches 14 13 
+   echo 1a3 1ab3 1aax3 18 1 | grep --color  '1[^[:alpha:]]*3'   # No matches
+
+
+
+  B)
+    Repetition - Interval Expressions
+    ----------------------------------
+    echo 123 you 123 | grep --colour '[[:alpha:]]\{2\}'
+    echo 123 you 123 | grep --colour '[^[:alpha:]]\{2\}' # 4 Matches 12 3space space1  23
+    echo 123 you 123 | grep --colour '[^[:alpha:][:space:]]\{2\}'  #Matches 12   12
+    
+  C)
+    Anchoring Matches
+    ------------------
+    #Match any number of digits but at the starting of the line. 
+    echo 123 you 123 | grep --colour '^[[:digit:]]*' #Matches starting 
+
+    #Match any number of non-digits but at the start of the line
+    echo you 123 you | grep --color '^[^[:digit:]]*'
+
+   #Match any number of non-alpha but at the end of the line
+    echo 123 you 123 | grep --color '[^[:alpha:]]*$' #Matches 123space at the end
+
+   
+    #The pattern should be zero or more non-digits but it should be at the start of the line
+    echo you 123 | grep --colour '^[^[:digit:]]*' #matches youspace
+ 
+  D) Back-Reference
+    ----------------
+    #Match starting with a followed by b or c 
+    echo pre ab123xx123xab post | grep --color '\(a[bc]\)\([0-9][0-9]*\)xx\2x\1'
+
+    echo pre ab123xx321xab post | grep --color '\(a[bc]\)\([0-9][0-9]*\)xx\2x\1' #Doesnt match anything because 123 not equal to 321
+    echo pre ab123xx321xac post | grep --color '\(a[bc]\)\([0-9][0-9]*\)xx\2x\1' #Doesnt match anything because ab not equal to ac
+
+  E) LONGEST MATCH:
+    ----------------
+
+    echo 123 eafg youyou | grep --color '[aeiouy]*' #Matches ea youyou 
+
+    #Matches the null character at the beginning of 1 replaces that with X
+    echo 123 eafg youyou | sed 's/[aeiouy]*/X/' #Outputs: X123 eafg youyou
+
+    #Longest match but the 1st left most match will be replaced
+    echo 123 eafg youyou | sed 's/[aeiouy][aeiouy]*/X/' #Ouputs: 123 Xfg youyou
+
+    echo 123 eafg youyou | sed 's/[aeiouy][aeiouy]*/X/g' #Ouputs: 123 Xfg X
+
+
+  F) EXTENDED REGEX: (OPTIONAL)
+     ---------------
+    echo ac abc abbc abbbbc | egrep --color 'ab?c' #matches ac abc
+    echo ac abc abbc abbbbc | egrep --color 'ab+c' #matches abc abbc abbbbc
+
+    echo abc 555-1212 555-2121 cba | egrep --color '([[:digit:]]{3}-[[:digit:]]{4} )+' #Matches 555-1212 555-2121
+
+    echo 'hello there
+    > hi there' | egrep --color 'hello|hi'  
+
+   echo 'hello and hi' | egrep --color '^hello|hi$' #Matches hello , hi
+
+   #But if i want to match a line containing only hello or hi, then:
+   echo 'hello and hi' | egrep --color '^(hello|hi)$'
+
+   echo 'hello
+   > hi' | egrep --color '^(hello|hi)$'   #Matches both hello & hi
+
+   #Uses grep with + operator by using \+
+   echo abc 555-1212 555-2121 cba | 
+   > grep --color '\([[:digit:]]\{3\}-[[:digit:]]\{4\} \)\+'
+
+
+  #Match any line starting with hello or hi using grep
+
+  echo 'hello                                   
+hi
+howdy' | grep --color '\(^hello\|hi$\)$'
+hello
+hi
+
+#Replaces hello & hi with xxx
+echo 'hello and hi' | sed  's/^hello\|hi$/xxx/g' 
+
+
+  echo 'hello
+ >hi
+ >howdy' | grep --color '^\(hello\|hi\)$' #Matches hello , hi
+   
+
+8) SED:
+   ------
+
+./sed-01-user-list.sh
+./sed-02-family-users.sh
+./sed-03-head.sh
+
+sed '1,5p' passwd | head -20  #Prints the 1st 5 lines twice and then on printed only once
+sed -n '1,5p' passwd | head -20  #Prints only the 1st 5 lines
+
+
+9) TILDE_WILDCARD:
+  
+  a)
+   ls -l ~/.bash_profile
+  sudo ls -l ~/testscript/.bash_profile
+  gcc -c *.c ; gcc -o hello *.o 
+  ls -l *.[!c]
+  ls -a
+  ls -l .bash*
+  
+  b) Extended_Wildcard (Optional)
+
+10) CUT_JOIN:
+   --------
+   grep --color '/bin/bash' passwd | cut -d : -f 1
+   grep -v ^# checkbook.txt | cut -d : -f 4 | sort -u
+   
+   join: (Optional)
+   -----
+   cat capitals
+   cat populations
+   join capitals populations 
+   join -o 1.1,2.2,1.2 capitals populations
+   sed '/^UK/d' capitals | join - populations #Produces error
+   sed '/^UK/d' capitals | join - populations
+
+11) AWK:
+    -----
+  #Prints only the lines having bin/bash as the shell. There is no action here. Print is the default action
+  awk -F : '$NF=/\/bin\/bash/' passwd 
+
+  awk -F : '$NF=/\/bin\/bash/  { print $3 }' passwd  #Prints only the 3rd field
+
+  awk -F : '($4 ~ /Pravin Kumar/) { total += $NF }
+                                    END { print "total:", total }' checkbook.txt
+ 
+    
+
+12) Sort-text:
+    ----------
+    cd ~/Personal
+    du -s * 
+    du -s * | sort -nr
+
+    grep -v ^# checkbook1.txt | sort -t : -k6gr  #Sort by amount
+    grep -v ^# checkbook1.txt | sort -t: -f -k4,4 #Sort by recipient. Option f is to ignore case
+
+    grep -v ^# checkbook1.txt | sort -t: -k5r  #Withdrawal comes first as Ascii value of W > D
+   
+    grep -v ^# checkbook1.txt | sort -t: -k5,5r  -k6,6gr # First Withdrawal, within W sort amount in reverse order g specifies floating point
+
+    sort -t: -k1 passwd | sed 10,40d | sed 's/:.*//' #Sort the user names ; Remove 10-40 lines so that the output fits on the screen.
+
+    sort -t: -k3n passwd | sed 10,40d # Sort by user id
+
+
+13) Variables:
+   ------------
+a) Basic variables
+
+first=Nikhil ; last=Madhav
+echo $first $last
+fullname="$first $last"
+echo $fullname
+N=$fullname
+echo $N #No quotes required in this case
+fullname+=" Navin"
+echo $fullname
+
+export -p #prints the env variables
+
+
+readonly Foo=junk
+env | grep Foo     #Doesnt list Foo
+Foo=something_else #shows error
+env | grep Foo     #Not in env list. env & read only are difffeent attributes for a variable
+readonly -p | grep Foo #lists Foo
+
+
+FOO=junk awk 'BEGIN  { print ENVIRON["FOO"] }' #Creates a temporary variable FOO just for the lifetime of awk command
+echo $FOO # Doesnt have in the shell namespace
+env | grep 'FOO'  #Also not present in environemnt for the shell
+env -i FOO=junk awk 'BEGIN { printf("<%s> <%s>\n", ENVIRON["FOO"], ENVIRON["PATH"])} 
+
+export Xvar=something
+echo $Xvar
+env | grep Xvar
+bash
+echo $Xvar
+env | grep Xvar
+exit
+unset Xvar
+echo $Xvar
+env | grep Xvar
+
+
+unset Xvar
+env | grep Xvar
+
+b) Parameter expansion:
+   --------------------
+a)
+echo _$HOME_
+echo _${HOME}_
+sleep 5 & echo $! # $ acts as a command separator
+echo $!   #implement this command after the background process is done.
+
+grep junk /etc/passwd
+echo $? #Prints 1
+
+echo my pid is $$ #Prints the pid of the shell
+ps #Output PID of bash Confirms it
+
+b)
+echo ${count:-0}
+echo $count
+count=5
+echo ${count:-0}
+unset count
+echo ${count:=42}
+echo $count
+
+c)
+path=/home/tolstoy/me/long.file.name
+echo ${path#/*/}
+echo ${path#/*}
+echo $path #  nothing happens to the original variable
+echo ${path##/*/} 
+echo $path
+echo ${path%.*}
+echo ${path%%.*}
+echo $(dirname $path) #dirname/basename creates a subshell
+
+d)
+Amount=100
+VAT=17
+echo $(( Amount + ( (Amount * VAT)/100 )   ))
+
+i=42
+echo $(( ++i ))
+i=42
+echo $(( i++ ))
+echo i is now $i
+
+a=40
+echo $(( a+=2 ))
+answer=42
+if (( 37+5 == 42))
+> then echo the answer is correct
+> else echo pl learn addition
+> fi
+
+14) Exit Status:
+   -------------
+cd /tmp/x
+echo $?
+cd $HOME
+echo $?
+
+
+
+
+List Directories:
+-----------------
+a)
+ls -l
+ls -al
+ls -l /tmp
+ld -ld /tmp
+
+b) touch commands
+touch f1.txt
+see bootstrap.sh
+
+c)
+df
+df -P
+mkdir d1 d2
+for i in d1/f1 d1/f2 d2/f1 d2/f2
+do echo this is $i > $i
+done
+du -sk *
+
+
+
+d)
+cp /etc/passwd .
+cp /etc/group .
+cmp group passwd 
+echo $?
+cmp -s group passwd 
+echo $?   
+   
+3) ./tempfile-01.sh
+   ./tempfile-02.sh 
+
+4) cd Find
+   mkdir -p sub/subs1
+   touch one two .uno .dos
+   touch sub/three sub/subs1/four
+   find
+   find | sort
+   find . -name 'o*'   
+   find sub           #Lists all folders/files inside sub dir
+  
+   touch /tmp/myfile
+   find /tmp -user root #Contains permission denied
+   find /tmp -user $USER #Contains myfile which we created
+   find /tmp -user ! $USER
+   find /tmp ! -user $USER #Lists all files not created by us
+
+   ls 
+   ln -s one One
+   find . -type l 
+   find . -type d
+   find . -type f
+   
+
+
+LastLooseEnds:
+---------------
+
+a) . cd.sh
+   cd /tmp
+   cd ~/bin
+
+b) ./getopts-demo.sh -f /x -v -l a b c
+
+c) type c #Open ~/.bashrc
+   type cd #Shell funcion
+   type awk 
+   type break
+

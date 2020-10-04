@@ -1,0 +1,44 @@
+
+
+1) Selects only the filesystems having xfs in /etc/fstab
+
+awk -F ' '  '/xfs/ { print $1 }' fstab
+
+2) Use the sort command to sort the /etc/passwd file to sort first by group id and then by user id.
+   sort -t: -k4,4n -k3,3n passwd
+
+3) Find the ip address of a system from the info presented by issuing the command ifconfig -a .
+   Display only the ip address.
+   ifconfig -a | awk '/cast/ { print $2 }' 
+
+4) Open a Terminal. Export a variable Xvar=something. Now open a new terminal by opening a new Tab and see whether the variable Xvar exists?
+   Why so? Now create a child bash shell within the terminal. Now see whether the variable Xvar exists or not?
+   What can you conclude?
+
+   Terminal created by New Tab is not a child process of the previous terminal program?
+
+5) You run the script:
+
+    #!/bin/bash
+
+    if cd /tmp/x
+    then
+         :
+    else
+         echo could not change to /tmp/x
+         exit 1
+    fi
+
+    What is the exit status of the script?
+   
+    Ans: 0
+
+
+
+
+
+
+
+
+  
+
