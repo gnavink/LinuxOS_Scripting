@@ -1,10 +1,9 @@
-#! /bin/sh
+#! /bin/bash
 
 today=$(date '+%A')
-if [ "$today" = Saturday ]
+if [ "$today" == Monday ]
 then
 	# feeling contrary
-
 	echo () {
 		printf "I don't wanna say '%s'!\n" "$*"
 		return 1
